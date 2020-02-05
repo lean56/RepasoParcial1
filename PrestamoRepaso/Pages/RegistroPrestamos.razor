@@ -1,0 +1,137 @@
+﻿@page "/prestamo"
+@using PrestamoRepaso.Controllers
+@using PrestamoRepaso.Entidad;
+
+
+<h3>Registro de Prestamos</h3>
+
+<EditForm Model="Prestamo" OnValidSubmit="Guardar">
+	<DataAnnotationsValidator />
+
+	<div class="form-group">
+		<label for="id">ID</label>
+		<InputNumber @bind-Value="@Prestamo.PrestamosId" class="form-control" />
+		<ValidationMessage For="@(()=>Prestamo.PrestamosId)" />
+		<br />
+		<button type="button" class="btn btn-outline-primary" @onclick="Buscar">Buscar</button>
+	</div>
+
+	<div class="form-group">
+		<label for="monto">Monto</label>
+		<InputNumber @bind-Value="@Prestamo.Monto" class="form-control" />
+		<ValidationMessage For="@(()=>Prestamo.Monto)" />
+	</div>
+
+	<div class="form-group">
+		<label for="semana">Semanas</label>
+		<InputNumber @bind-Value="@Prestamo.Semanas" class="form-control" />
+		<ValidationMessage For="@(()=>Prestamo.Semanas)" />
+	</div>
+
+	<div class="form-group">
+		<label for="MontoCuotas">Monto de las cuotas</label>
+		<InputNumber @bind-Value="Prestamo.Cuota" class="form-control" disabled />
+		<ValidationMessage For="@(() => Prestamo.Cuota)" />
+	</div>
+
+	<div class="form-group">
+		<button type="button" class="btn btn-secondary" @onclick="Limpiar">Nuevo</button>
+
+		<button type="submit" class="btn btn-primary">Guardar</button>
+		<button type="button" class="btn btn-success" @onclick="Eliminar">Eliminar</button>
+
+	</div>
+	<br />
+	<p class="text-success">@mensaje</p>
+
+</EditForm>
+
+
+@code {
+	public Prestamos Prestamo { get; set; }
+	public string mensaje;
+
+	protected override void  OnInitialized()
+	{
+		Prestamo = new Prestamos();
+		mensaje = string.Empty;
+	}
+	public void Guardar()
+	{
+		PrestamoController db = new PrestamoController();
+
+		if (Prestamo.PrestamosId ==0)
+		{
+			Calculo();
+			if (db.Guardar(Prestamo))
+			{
+				Prestamo = new Prestamos();
+				mensaje = "Prestamos Guardado";
+			}
+			else
+			{
+				mensaje = "Prestamo no existe";
+			}
+		}
+		else
+		{
+			Calculo();
+			if (db.Modificar(Prestamo))
+			{
+				Prestamo = new Prestamos();
+				mensaje = "Prestamos Modificado";
+			}else
+			{
+				mensaje = "Prestamo no existe";
+			}
+		}
+	}
+
+	public void Calculo()
+	{
+		Prestamo.Cuota = Prestamo.Monto / Prestamo.Semanas;
+	}
+
+	public void Buscar()
+	{
+		PrestamoController db = new PrestamoController();
+
+		Prestamos temporal = null;
+
+		temporal = db.Buscar(Prestamo.PrestamosId);
+
+		if (temporal != null)
+		{
+			Prestamo = temporal;
+			mensaje = string.Empty;
+		}
+		else
+		{
+			mensaje = "Prestamo no existe";
+			Prestamo = new Prestamos();
+		}
+
+	}
+
+	public void Eliminar()
+	{
+		PrestamoController db = new PrestamoController();
+
+		if (Prestamo.PrestamosId !=0)
+		{
+			db.Eliminar(Prestamo.PrestamosId);
+			mensaje = "Prestamo Eliminado";
+			Prestamo = new Prestamos();
+		}
+		else
+		{
+			mensaje="error al eliminar";
+		}
+	}
+
+	private void Limpiar()
+	{
+		mensaje = string.Empty;
+		Prestamo = new Prestamos();
+	}
+}
