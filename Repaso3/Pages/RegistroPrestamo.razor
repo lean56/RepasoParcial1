@@ -1,0 +1,103 @@
+﻿@page "/prestamo"
+@using Repaso3.Controllers
+@using Repaso3.Entidades
+	<h3>RegistroPrestamo</h3>
+
+<EditForm Model="Prestamo" OnValidSubmit="Guardar">
+
+
+	<div class="form-group">
+		<InputNumber @bind-Value="@Prestamo.PrestamosId" class="form-control"/>
+		<button type="button" class="btn btn-primary" @onclick="Buscar">Buscar</button>
+	</div>
+
+	<div class="form-group">
+		<label for="Monto">Monto</label>
+		<InputNumber @bind-Value="@Prestamo.Monto" class="form-control"/>
+		<ValidationMessage For="@(()=>Prestamo.Monto)"/>
+	</div>
+
+	<div class="form-group">
+		<label for="Semanas">Semanas</label>
+		<InputNumber @bind-Value="@Prestamo.Semanas" class="form-control"/>
+		<ValidationMessage For="@(()=>Prestamo.Semanas)"/>
+	</div>
+
+	<div class="form-group">
+		<button type="submit" class="btn btn-primary">Guardar</button>
+	</div>
+
+	<p class="text-success">@msj</p>
+
+
+
+</EditForm>
+
+
+
+
+@code {
+
+	public Prestamos Prestamo { get; set; }
+	string msj;
+	protected override void OnInitialized()
+	{
+		Prestamo = new Prestamos();
+		msj = string.Empty;
+	}
+
+	public void Guardar()
+	{
+		PrestamoController controller = new PrestamoController();
+
+		if (Prestamo.PrestamosId == 0)
+		{
+			if (controller.Guardar(Prestamo))
+			{
+				msj = "Guardado";
+				Prestamo = new Prestamos();
+			}
+			else
+			{
+				msj = "error al guardar";
+			}
+		}
+		else
+		{
+			if (controller.Modificar(Prestamo))
+			{
+				msj = "prestamo modificado";
+				Prestamo = new Prestamos();
+			}
+			else
+			{
+				msj = "error al modificar";
+			}
+		}
+
+	}
+
+	public void Buscar()
+	{
+		PrestamoController controller = new PrestamoController();
+
+		try
+		{
+			Prestamos prestamo = null;
+			prestamo = controller.Buscar(Prestamo.PrestamosId);
+
+			if (prestamo !=null)
+			{
+				Prestamo = prestamo;
+			}else
+			{ msj = "no existe"; }
+
+		}
+		catch (Exception)
+		{
+
+			throw;
+		}
+	}
+
+}
